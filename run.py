@@ -50,6 +50,18 @@ def getTarea():
     
     return jsonify(context)
 
+@app.route('/tarea/<id>')
+def getTareaById(id):
+    data = Tarea.query.get(id)
+    data_schema = TareaSchema()
+    
+    context = {
+        'status':True,
+        'content':data_schema.dump(data)
+    }
+    
+    return jsonify(context)
+
 
 @app.route('/tarea',methods=['POST'])
 def setTarea():
@@ -68,6 +80,41 @@ def setTarea():
         'content':data_schema.dump(nuevaTarea)
     }
 
+    return jsonify(context)
+
+@app.route('/tarea/<id>',methods=['PUT'])
+def updateTarea(id):
+    descripcion = request.json['descripcion']
+    estado = request.json['estado']
+    
+    updateTarea = Tarea.query.get(id)
+    updateTarea.descripcion = descripcion
+    updateTarea.estado = estado
+    db.session.commit()
+    
+    data_schema = TareaSchema()
+    
+    context = {
+        'status':True,
+        'content':data_schema.dump(updateTarea)
+    }
+    
+    return jsonify(context)
+
+@app.route('/tarea/<id>',methods=['DELETE'])
+def deleteTarea(id):
+    
+    deleteTarea = Tarea.query.get(id)
+    db.session.delete(deleteTarea)
+    db.session.commit()
+    
+    data_schema = TareaSchema()
+    
+    context = {
+        'status':True,
+        'content':data_schema.dump(deleteTarea)
+    }
+    
     return jsonify(context)
 
 app.run(debug=True)
