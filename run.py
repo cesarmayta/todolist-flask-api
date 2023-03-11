@@ -22,7 +22,7 @@ class Tarea(db.Model):
         
 ### esquemas ###
 ma = Marshmallow(app)
-class TareSchema(ma.Schema):
+class TareaSchema(ma.Schema):
     class Meta:
         fields = ('id','descripcion','estado')
         
@@ -41,13 +41,33 @@ def index():
 @app.route('/tarea')
 def getTarea():
     data = Tarea.query.all() #select id,descripcion,estado from tarea    
-    data_schema = TareSchema(many=True)
+    data_schema = TareaSchema(many=True)
     
     context = {
         'status':True,
         'content':data_schema.dump(data)
     }
     
+    return jsonify(context)
+
+
+@app.route('/tarea',methods=['POST'])
+def setTarea():
+    descripcion = request.json['descripcion']
+    estado = request.json['estado']
+    
+    #insert into tarea(descripcion,estado) values(?,?)
+    nuevaTarea = Tarea(descripcion,estado)
+    db.session.add(nuevaTarea)
+    db.session.commit()
+    
+    data_schema = TareaSchema()
+    
+    context = {
+        'status':True,
+        'content':data_schema.dump(nuevaTarea)
+    }
+
     return jsonify(context)
 
 app.run(debug=True)
